@@ -10,13 +10,13 @@ class Game:
 			
 	def announceResult(self, result):
 		if result == 0:
-			print "It's a draw!"
+			print "Shockingly, it's a draw!!!"
 		elif result == 1:
 			print "Player 1 is the winner!"
 		elif result == 2:
 			print "Player 2 is the winner!"
 		else:
-			print "Shockingly, it's a draw!!!"
+			print "Invalid result!!!"
 		
 
 	def gameLoop(self):
