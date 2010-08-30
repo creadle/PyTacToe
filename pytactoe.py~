@@ -1,0 +1,45 @@
+#This is my version of TicTacToe
+#I'm implementing this as a Breakable Toy, so it will likely be way overengineered, but that's the point
+
+class Game:
+
+	"""This class controls the game loop and annouces the winner if there is one. """
+
+	def __init__(self, player1Symbol, player2Symbol):
+		self.board = Board()
+		self.player1 = Player(player1Symbol)
+		self.player2 = Player(player2Symbol)
+	
+	def announceCurrentState(self):
+		pass
+
+	def announceResult(self, result):
+		pass
+
+	def hasWinner(self):
+		pass
+
+class Board:
+	"""Holds the board state and handles making the moves"""
+
+	def __init__(self):
+		self.board = []
+
+	def hasValidMove(self):
+		pass
+
+	def makeMove(self, move):
+		pass
+
+	def displayBoard(self):
+		pass
+
+class Player:
+	"""Holds the symbol that each player is using"""
+
+	def __init__(self, symbol):
+		self.playerSymbol = symbol
+
+
+
+
