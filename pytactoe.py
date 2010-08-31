@@ -41,15 +41,21 @@ class Game:
 				break
 	
 	def requestMove(self):
-		move = int(input("Please input the number of the square for your move:"))
-		while move < 0 and move > 8 and self.board.board[move]:
-			print("That is not a valid move.\n")
-			move = int(input("Please input the number of the square for your move:"))
+		move = int(input("Please input the number of the square for your move: "))
+		while not self.isValidMove(move):
+			print("That is not a valid move.")
+			self.board.displayBoard()
+			move = int(input("Please input the number of the square for your move: "))
 		
+		#since we're displaying numbers as 1-9 and the array runs as 0-8, we're taking away one from what we return
 		return move
+
+	def isValidMove(self, move):
+		return (move >= 0 and move <= 8 and self.board.board[move].getState() == 0)
+	
 	
 	def gameSetup(self):
-		print("\n")
+		print()
 		symbol = input("Shall Player 1 be 'X' or 'O'?")
 		while symbol != "X" and symbol != "O":
 			symbol = input("Shall Player 1 be 'X' or 'O'?")
@@ -66,32 +72,35 @@ class Board:
 	"""Holds the board state and handles making the moves"""
 
 	def __init__(self):
-		self.board = [0,0,0,0,0,0,0,0,0]
+		self.board = []
 		self.rows = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]]
+		for i in range(9):
+			self.board.append(Square(0, i))
 
 	def hasValidMove(self):
-		for square in self.board:
-			if square == 0:
+		for i in range(len(self.board)):
+			if self.board[i].getState() == 0:
 				return True
 		return False
 
 	def makeMove(self, move, symbol):
-		self.board[move] = symbol
+		self.board[move].setState = symbol
 
 	def displayBoard(self):
-		print("{0}|{1}|{2}".format(self.board[0], self.board[1], self.board[2]))
+		print("{0}|{1}|{2}".format(self.board[0].display, self.board[1].display, self.board[2].display))
 		print("-----")
-		print("{0}|{1}|{2}".format(self.board[3], self.board[4], self.board[5]))
+		print("{0}|{1}|{2}".format(self.board[3].display, self.board[4].display, self.board[5].display))
 		print("-----")
-		print("{0}|{1}|{2}".format(self.board[6], self.board[7], self.board[8]))
+		print("{0}|{1}|{2}".format(self.board[6].display, self.board[7].display, self.board[8].display))
 
 	def checkForWinner(self):
 		for row in self.rows:
 			rowTotal = 0
 			for cell in row:
-				if self.board[cell] == game.player1.playerSymbol:
+				print("*** ", self.board[cell].getState())
+				if self.board[cell].getState() == game.player1.playerSymbol:
 					rowTotal += 1
-				elif self.board[cell] == game.player2.playerSymbol:
+				elif self.board[cell].getState() == game.player2.playerSymbol:
 					rowTotal += 10
 			if rowTotal == 3:
 				return 1
@@ -99,6 +108,23 @@ class Board:
 				return 2
 			else:
 				return 0
+
+class Square:
+	"""Holds the state for each square, as well as the display character."""
+
+	def __init__(self, state, display):
+		self.state = state
+		self.display = display
+	
+	def getState(self):
+		return self.state
+
+	def setState(self, state):
+		self.state = state
+		self.display = state
+
+	def getDisplay(self):
+		return self.display
 
 		
 class Player:
@@ -111,7 +137,7 @@ class Player:
 #start the show
 game = Game()
 
-print("Welcome to PyTacToe!\n")
+print("Welcome to PyTacToe!")
 game.gameSetup()
 game.gameLoop()
 result = game.board.checkForWinner()
