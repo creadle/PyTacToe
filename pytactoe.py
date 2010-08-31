@@ -7,11 +7,12 @@ class Game:
 
 	def __init__(self):
 		self.board = Board()
+		self.player1 = None
+		self.player2 = None
 			
 	def announceResult(self, result):
 		if result == 0:
 			print("Shockingly, it\'s a draw!!!")
-			pass
 		elif result == 1:
 			print("Player 1 is the winner!")
 		elif result == 2:
@@ -21,30 +22,37 @@ class Game:
 		
 
 	def gameLoop(self):
-		symbol = player1.playerSymbol
+		symbol = self.player1.playerSymbol
 		while 1:
-			board.displayBoard(board)
-			if board.hasValidMove(board):
-				move = raw_input("Please input the number of the square for your move:")
-				while move < 0 or move > 8 or board.board[move]:
-					print("That is not a valid move.\n")
-					move = raw_input("Please input the number of the square for your move:")
-
-				board.makeMove(board, move, symbol)
-				if board.checkForWinner(board):
+			self.board.displayBoard()
+			if self.board.hasValidMove():
+				move = self.requestMove()
+				self.board.makeMove(move, symbol)
+				if self.board.checkForWinner():
 					break
 				else:
+					if symbol == self.player1.playerSymbol:
+						symbol = self.player2.playerSymbol
+					else:
+						symbol = self.player1.playerSymbol
 					continue
 
 			else:
 				break
-
-
+	
+	def requestMove(self):
+		move = int(input("Please input the number of the square for your move:"))
+		while move < 0 and move > 8 and self.board.board[move]:
+			print("That is not a valid move.\n")
+			move = int(input("Please input the number of the square for your move:"))
+		
+		return move
+	
 	def gameSetup(self):
 		print("\n")
-		symbol = raw_input("Shall Player 1 be 'X' or 'O'?")
-		while symbol != "X" or symbol != "O":
-			symbol = raw_input("Shall Player 1 be 'X' or 'O'?")
+		symbol = input("Shall Player 1 be 'X' or 'O'?")
+		while symbol != "X" and symbol != "O":
+			symbol = input("Shall Player 1 be 'X' or 'O'?")
 
 		if symbol == "X":
 			self.player1 = Player("X")
@@ -65,29 +73,29 @@ class Board:
 		for square in self.board:
 			if square == 0:
 				return True
-			return False
+		return False
 
 	def makeMove(self, move, symbol):
 		self.board[move] = symbol
 
 	def displayBoard(self):
-		print "{1s}|{1s}|{1s}".format(self.board[0], self.board[1], self.board[2])
-		print "-----"
-		print "{1s}|{1s}|{1s}".format(self.board[3], self.board[4], self.board[5])
-		print "-----"
-		print "{1s}|{1s}|{1s}".format(self.board[6], self.board[7], self.board[8])
+		print("{0}|{1}|{2}".format(self.board[0], self.board[1], self.board[2]))
+		print("-----")
+		print("{0}|{1}|{2}".format(self.board[3], self.board[4], self.board[5]))
+		print("-----")
+		print("{0}|{1}|{2}".format(self.board[6], self.board[7], self.board[8]))
 
 	def checkForWinner(self):
 		for row in self.rows:
 			rowTotal = 0
 			for cell in row:
-				if cell == game.player1.playerSymbol:
+				if self.board[cell] == game.player1.playerSymbol:
 					rowTotal += 1
-				elif cell == "O":
+				elif self.board[cell] == game.player2.playerSymbol:
 					rowTotal += 10
-			if rowTotal = 3:
+			if rowTotal == 3:
 				return 1
-			elif rowTotal = 30:
+			elif rowTotal == 30:
 				return 2
 			else:
 				return 0
@@ -104,8 +112,9 @@ class Player:
 game = Game()
 
 print("Welcome to PyTacToe!\n")
-game.gameSetup(game)
-game.gameLoop(game)
-result = game.board.checkForWinner(game.board)
-game.announceResult(game, result)
+game.gameSetup()
+game.gameLoop()
+result = game.board.checkForWinner()
+game.board.displayBoard()
+game.announceResult(result)
 
