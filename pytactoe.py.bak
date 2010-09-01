@@ -96,7 +96,6 @@ class Board:
 		for row in self.rows:
 			rowTotal = 0
 			for cell in row:
-				print("*** ", self.board[cell].getState())
 				if self.board[cell].getState() == game.player1.playerSymbol:
 					rowTotal += 1
 				elif self.board[cell].getState() == game.player2.playerSymbol:

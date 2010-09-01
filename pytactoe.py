@@ -55,10 +55,36 @@ class Game:
 	
 	def gameSetup(self):
 		print()
-		symbol = input("Shall Player 1 be 'X' or 'O'?")
+		numberOfPlayers = input("Please enter the number of players: ")
+		while numberOfPlayer < 0 and numberOfPlayers > 2:
+			numberOfPlayers = input("Please enter the number of players: ")
+		if numberOfPlayers == 2:
+			self.getPlayer1Symbol()
+			self.player1.setHuman(True)
+			self.player2.setHuman(True)
+		elif numberOfPlayer == 1:
+			humanPlayer = input("Shall the human player be player 1 or 2? ")
+			while humanPlayer < 1 and humanPlayer > 2:
+				humanPlayer = input("Shall the human player be player 1 or 2? ")
+				
+			if humanPlayer == 1:
+				self.getPlayer1Symbol()
+				self.player1.setHuman(True)
+				self.player2.setHuman(False)
+			else:
+				self.getPlayer1Symbol()
+				self.player1.setHuman(False)
+				self.player2.setHuman(True)
+		else:
+			self.getPlayer1Symbol()
+			self.player1.setHuman(False)
+			self.player2.setHuman(False)
+			
+				
+	def getPlayer1Symbol(self):
+		symbol = input("Shall player 1 be 'X' or 'O'? ")
 		while symbol != "X" and symbol != "O":
-			symbol = input("Shall Player 1 be 'X' or 'O'?")
-
+				symbol = input("Shall Player 1 be 'X' or 'O'?")
 		if symbol == "X":
 			self.player1 = Player("X")
 			self.player2 = Player("O")
@@ -131,6 +157,13 @@ class Player:
 
 	def __init__(self, symbol):
 		self.playerSymbol = symbol
+		self.human = None
+	
+	def isHuman(self):
+		return self.human
+		
+	def setHuman(self, humanState):
+		self.human = humanState
 
 
 #start the show
