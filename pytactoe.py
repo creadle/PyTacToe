@@ -47,7 +47,6 @@ class Game:
 			self.board.displayBoard()
 			move = int(input("Please input the number of the square for your move: "))
 		
-		#since we're displaying numbers as 1-9 and the array runs as 0-8, we're taking away one from what we return
 		return move
 
 	def isValidMove(self, move):
@@ -84,20 +83,19 @@ class Board:
 		return False
 
 	def makeMove(self, move, symbol):
-		self.board[move].setState = symbol
+		self.board[move].setState(symbol)
 
 	def displayBoard(self):
-		print("{0}|{1}|{2}".format(self.board[0].display, self.board[1].display, self.board[2].display))
+		print("{0}|{1}|{2}".format(self.board[0].getDisplay(), self.board[1].getDisplay(), self.board[2].getDisplay()))
 		print("-----")
-		print("{0}|{1}|{2}".format(self.board[3].display, self.board[4].display, self.board[5].display))
+		print("{0}|{1}|{2}".format(self.board[3].getDisplay(), self.board[4].getDisplay(), self.board[5].getDisplay()))
 		print("-----")
-		print("{0}|{1}|{2}".format(self.board[6].display, self.board[7].display, self.board[8].display))
+		print("{0}|{1}|{2}".format(self.board[6].getDisplay(), self.board[7].getDisplay(), self.board[8].getDisplay()))
 
 	def checkForWinner(self):
 		for row in self.rows:
 			rowTotal = 0
 			for cell in row:
-				print("*** ", self.board[cell].getState())
 				if self.board[cell].getState() == game.player1.playerSymbol:
 					rowTotal += 1
 				elif self.board[cell].getState() == game.player2.playerSymbol:
@@ -107,7 +105,8 @@ class Board:
 			elif rowTotal == 30:
 				return 2
 			else:
-				return 0
+				continue
+		return 0
 
 class Square:
 	"""Holds the state for each square, as well as the display character."""
