@@ -22,76 +22,59 @@ class Game:
 		
 
 	def gameLoop(self):
-		symbol = self.player1.playerSymbol
+		if self.player1.getSymbol() == 'X':
+			currentPlayer = self.player1
+		else:
+			currentPlayer = self.player2
 		while 1:
 			self.board.displayBoard()
 			if self.board.hasValidMove():
-				move = self.requestMove()
-				self.board.makeMove(move, symbol)
+				move = currentPlayer.requestMove()
+				self.board.makeMove(move, currentPlayer.getSymbol())
 				if self.board.checkForWinner():
 					break
 				else:
-					if symbol == self.player1.playerSymbol:
-						symbol = self.player2.playerSymbol
+					if currentPlayer == self.player1:
+						currentPlayer = self.player2
 					else:
-						symbol = self.player1.playerSymbol
+						currentPlayer = self.player1
 					continue
 
 			else:
 				break
-	
-	def requestMove(self):
-		move = int(input("Please input the number of the square for your move: "))
-		while not self.isValidMove(move):
-			print("That is not a valid move.")
-			self.board.displayBoard()
-			move = int(input("Please input the number of the square for your move: "))
 		
-		return move
-
-	def isValidMove(self, move):
-		return (move >= 0 and move <= 8 and self.board.board[move].getState() == 0)
-	
 	
 	def gameSetup(self):
 		print()
-		numberOfPlayers = input("Please enter the number of players: ")
-		while numberOfPlayer < 0 and numberOfPlayers > 2:
+		numberOfPlayers = int(input("Please enter the number of players: "))
+		while numberOfPlayers < 0 and numberOfPlayers > 2:
 			numberOfPlayers = input("Please enter the number of players: ")
+		whichPlayerIsX = int(input("Which player shall play as 'X', player 1 or player 2? "))
+		while whichPlayerIsX < 1 and whichPlayerIsX > 2:
+			whichPlayerIsX = input("Which player shall play as 'X', player 1 or player 2? ")
+		
 		if numberOfPlayers == 2:
-			self.getPlayer1Symbol()
-			self.player1.setHuman(True)
-			self.player2.setHuman(True)
-		elif numberOfPlayer == 1:
-			humanPlayer = input("Shall the human player be player 1 or 2? ")
-			while humanPlayer < 1 and humanPlayer > 2:
-				humanPlayer = input("Shall the human player be player 1 or 2? ")
-				
-			if humanPlayer == 1:
-				self.getPlayer1Symbol()
-				self.player1.setHuman(True)
-				self.player2.setHuman(False)
+			if whichPlayerIsX == 1:
+				self.player1 = HumanPlayer('X')
+				self.player2 = HumanPlayer('O')
 			else:
-				self.getPlayer1Symbol()
-				self.player1.setHuman(False)
-				self.player2.setHuman(True)
+				self.player2 = HumanPlayer('X')
+				self.player1 = HumanPlayer('O')
+		elif numberOfPlayers == 1:
+			if whichPlayerIsX == 1:
+				self.player1 = HumanPlayer('X')
+				self.player2 = ComputerPlayer('O')
+			else:
+				self.player2 = ComputerPlayer('X')
+				self.player1 = HumanPlayer('O')
 		else:
-			self.getPlayer1Symbol()
-			self.player1.setHuman(False)
-			self.player2.setHuman(False)
-			
-				
-	def getPlayer1Symbol(self):
-		symbol = input("Shall player 1 be 'X' or 'O'? ")
-		while symbol != "X" and symbol != "O":
-				symbol = input("Shall Player 1 be 'X' or 'O'?")
-		if symbol == "X":
-			self.player1 = Player("X")
-			self.player2 = Player("O")
-		else:
-			self.player1 = Player("O")
-			self.player2 = Player("X")
-
+			if whichPlayerIsX == 1:
+				self.player1 = ComputerPlayer('X')
+				self.player2 = ComputerPlayer('O')
+			else:
+				self.player2 = ComputerPlayer('X')
+				self.player1 = ComputerPlayer('O')
+		
 
 class Board:
 	"""Holds the board state and handles making the moves"""
@@ -120,12 +103,7 @@ class Board:
 
 	def checkForWinner(self):
 		for row in self.rows:
-			rowTotal = 0
-			for cell in row:
-				if self.board[cell].getState() == game.player1.playerSymbol:
-					rowTotal += 1
-				elif self.board[cell].getState() == game.player2.playerSymbol:
-					rowTotal += 10
+			rowTotal = self.getRowTotal(row)
 			if rowTotal == 3:
 				return 1
 			elif rowTotal == 30:
@@ -133,6 +111,22 @@ class Board:
 			else:
 				continue
 		return 0
+		
+	def getRowTotal(self, row):
+		rowTotal = 0
+		for cell in row:
+			if self.board[cell].getState() == game.player1.getSymbol():
+				rowTotal += 1
+			elif self.board[cell].getState() == game.player2.getSymbol():
+				rowTotal += 10
+		
+		return rowTotal
+		
+	def getRows(self):
+		return self.rows
+	
+	def isValidMove(self, move):
+		return (move >= 0 and move <= 8 and self.board[move].getState() == 0)
 
 class Square:
 	"""Holds the state for each square, as well as the display character."""
@@ -153,34 +147,78 @@ class Square:
 
 		
 class Player:
-	"""Holds the symbol that each player is using"""
+	"""Holds the symbol that each player is using as well the requestMove() method to request (or calculate in the case of a computer opponent) the move"""
 
 	def __init__(self, symbol):
 		self.playerSymbol = symbol
 
 	def requestMove(self):
-	"""we're just going to be overriding this.  there should never be a generic Player object
-	that will receive a call to this..."""
+		"""we're just going to be overriding this.  there should never be a generic Player object that will receive a call to this..."""
 		pass
+	
+	def getSymbol(self):
+		return self.playerSymbol
 
 class HumanPlayer(Player):
-	"""subclass for Human Players.  We'll be moving the requestMove() methoed into the parent and
-	overriding in here and in ComputerPlayer"""
+	"""subclass for Human Players.  We'll be moving the requestMove() methoed into the parent and overriding in here and in ComputerPlayer"""
 	
-	def __init__(self, symbol):
-		self.playerSymbol = symbol
+	# def __init__(self, symbol):
+		# self.playerSymbol = symbol
 		
 	def requestMove(self):
-		pass
+		move = int(input("Please input the number of the square for your move: "))
+		while not game.board.isValidMove(move):
+			print("That is not a valid move.")
+			game.board.displayBoard()
+			move = int(input("Please input the number of the square for your move: "))
+	
+		return move
 		
 class ComputerPlayer(Player):
 	"""sub for computer players"""
 	
-	def __init__(self, symbol):
-		self.playerSymbol = symbol
+	# def __init__(self, symbol):
+		# self.playerSymbol = symbol
 		
 	def requestMove(self):
-		pass
+		#initially the algo here will be rather simple, basically looking at the rows with the closest for a win for either player
+		#making a move in that same row.  Later on, I'll setup some kind of tree like Micah Martin suggested
+		#for Jake Scruggs to do.
+		
+		if self.playerSymbol == game.player1.getSymbol():
+			myTotal = 2
+			opponentTotal = 20
+		else:
+			myTotal = 20
+			opponentTotal = 2
+		candidateMoves = []
+		strongCandidates = []
+		for row in game.board.getRows():
+			validMoves = []
+			total = game.board.getRowTotal(row)
+			if total == myTotal:
+				validMoves.extend(self.determineValidMovesInRow(row))
+				strongCandidates.insert(0, validMoves)
+			elif total == opponentTotal:
+				validMoves.extend(self.determineValidMovesInRow(row))
+				strongCandidates.append(validMoves)
+			else:
+				validMoves.extend(self.determineValidMovesInRow(row))
+				candidateMoves.extend(validMoves)
+		
+		if len(strongCandidates) > 0:
+			return strongCandidates[0]
+		else:
+			return candidateMoves[0]
+						
+	def determineValidMovesInRow(self, row):
+		moves = []
+		for square in row:
+			if game.board.isValidMove(square):
+				moves.append(square)
+		return moves
+						
+		
 
 #start the show
 game = Game()
