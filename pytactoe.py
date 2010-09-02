@@ -157,14 +157,30 @@ class Player:
 
 	def __init__(self, symbol):
 		self.playerSymbol = symbol
-		self.human = None
-	
-	def isHuman(self):
-		return self.human
-		
-	def setHuman(self, humanState):
-		self.human = humanState
 
+	def requestMove(self):
+	"""we're just going to be overriding this.  there should never be a generic Player object
+	that will receive a call to this..."""
+		pass
+
+class HumanPlayer(Player):
+	"""subclass for Human Players.  We'll be moving the requestMove() methoed into the parent and
+	overriding in here and in ComputerPlayer"""
+	
+	def __init__(self, symbol):
+		self.playerSymbol = symbol
+		
+	def requestMove(self):
+		pass
+		
+class ComputerPlayer(Player):
+	"""sub for computer players"""
+	
+	def __init__(self, symbol):
+		self.playerSymbol = symbol
+		
+	def requestMove(self):
+		pass
 
 #start the show
 game = Game()

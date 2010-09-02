@@ -47,7 +47,6 @@ class Game:
 			self.board.displayBoard()
 			move = int(input("Please input the number of the square for your move: "))
 		
-		#since we're displaying numbers as 1-9 and the array runs as 0-8, we're taking away one from what we return
 		return move
 
 	def isValidMove(self, move):
@@ -56,10 +55,36 @@ class Game:
 	
 	def gameSetup(self):
 		print()
-		symbol = input("Shall Player 1 be 'X' or 'O'?")
+		numberOfPlayers = input("Please enter the number of players: ")
+		while numberOfPlayer < 0 and numberOfPlayers > 2:
+			numberOfPlayers = input("Please enter the number of players: ")
+		if numberOfPlayers == 2:
+			self.getPlayer1Symbol()
+			self.player1.setHuman(True)
+			self.player2.setHuman(True)
+		elif numberOfPlayer == 1:
+			humanPlayer = input("Shall the human player be player 1 or 2? ")
+			while humanPlayer < 1 and humanPlayer > 2:
+				humanPlayer = input("Shall the human player be player 1 or 2? ")
+				
+			if humanPlayer == 1:
+				self.getPlayer1Symbol()
+				self.player1.setHuman(True)
+				self.player2.setHuman(False)
+			else:
+				self.getPlayer1Symbol()
+				self.player1.setHuman(False)
+				self.player2.setHuman(True)
+		else:
+			self.getPlayer1Symbol()
+			self.player1.setHuman(False)
+			self.player2.setHuman(False)
+			
+				
+	def getPlayer1Symbol(self):
+		symbol = input("Shall player 1 be 'X' or 'O'? ")
 		while symbol != "X" and symbol != "O":
-			symbol = input("Shall Player 1 be 'X' or 'O'?")
-
+				symbol = input("Shall Player 1 be 'X' or 'O'?")
 		if symbol == "X":
 			self.player1 = Player("X")
 			self.player2 = Player("O")
@@ -84,30 +109,30 @@ class Board:
 		return False
 
 	def makeMove(self, move, symbol):
-		self.board[move].setState = symbol
+		self.board[move].setState(symbol)
 
 	def displayBoard(self):
-		print("{0}|{1}|{2}".format(self.board[0].display, self.board[1].display, self.board[2].display))
+		print("{0}|{1}|{2}".format(self.board[0].getDisplay(), self.board[1].getDisplay(), self.board[2].getDisplay()))
 		print("-----")
-		print("{0}|{1}|{2}".format(self.board[3].display, self.board[4].display, self.board[5].display))
+		print("{0}|{1}|{2}".format(self.board[3].getDisplay(), self.board[4].getDisplay(), self.board[5].getDisplay()))
 		print("-----")
-		print("{0}|{1}|{2}".format(self.board[6].display, self.board[7].display, self.board[8].display))
+		print("{0}|{1}|{2}".format(self.board[6].getDisplay(), self.board[7].getDisplay(), self.board[8].getDisplay()))
 
 	def checkForWinner(self):
 		for row in self.rows:
 			rowTotal = 0
 			for cell in row:
-				print("*** ", self.board[cell].getState()
-				if self.board[cell].state == game.player1.playerSymbol:
+				if self.board[cell].getState() == game.player1.playerSymbol:
 					rowTotal += 1
-				elif self.board[cell].state == game.player2.playerSymbol:
+				elif self.board[cell].getState() == game.player2.playerSymbol:
 					rowTotal += 10
 			if rowTotal == 3:
 				return 1
 			elif rowTotal == 30:
 				return 2
 			else:
-				return 0
+				continue
+		return 0
 
 class Square:
 	"""Holds the state for each square, as well as the display character."""
@@ -132,6 +157,13 @@ class Player:
 
 	def __init__(self, symbol):
 		self.playerSymbol = symbol
+		self.human = None
+	
+	def isHuman(self):
+		return self.human
+		
+	def setHuman(self, humanState):
+		self.human = humanState
 
 
 #start the show
