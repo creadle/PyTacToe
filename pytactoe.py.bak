@@ -185,6 +185,7 @@ class ComputerPlayer(Player):
 		#initially the algo here will be rather simple, basically looking at the rows with the closest for a win for either player
 		#making a move in that same row.  Later on, I'll setup some kind of tree like Micah Martin suggested
 		#for Jake Scruggs to do.
+		random.seed()
 		
 		if self.playerSymbol == game.player1.getSymbol():
 			myTotal = 2
@@ -210,7 +211,6 @@ class ComputerPlayer(Player):
 		if len(strongCandidates) > 0:
 			return strongCandidates[0]
 		else:
-			seed()
 			return candidateMoves[random.randint(0,len(candidateMoves) - 1)]
 						
 	def determineValidMovesInRow(self, row):

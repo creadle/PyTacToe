@@ -198,6 +198,9 @@ class ComputerPlayer(Player):
 		for row in game.board.getRows():
 			validMoves = []
 			total = game.board.getRowTotal(row)
+			
+			#if it's a winning move we want it at the top of the list, and blocking moves at the bottom
+			#either way, we return the first move in the list
 			if total == myTotal:
 				validMoves.extend(self.determineValidMovesInRow(row))
 				strongCandidates[0:] = validMoves
@@ -211,6 +214,7 @@ class ComputerPlayer(Player):
 		if len(strongCandidates) > 0:
 			return strongCandidates[0]
 		else:
+			#since we don't have a winning or blocking move, pick a random choice from among the valid moves
 			return candidateMoves[random.randint(0,len(candidateMoves) - 1)]
 						
 	def determineValidMovesInRow(self, row):
