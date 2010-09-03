@@ -1,5 +1,6 @@
 #This is my version of TicTacToe
 #I'm implementing this as a Breakable Toy, so it will likely be way overengineered, but that's the point
+import random
 
 class Game:
 
@@ -92,7 +93,7 @@ class Board:
 		return False
 
 	def makeMove(self, move, symbol):
-		self.board[move[0]].setState(symbol)
+		self.board[move].setState(symbol)
 
 	def displayBoard(self):
 		print("{0}|{1}|{2}".format(self.board[0].getDisplay(), self.board[1].getDisplay(), self.board[2].getDisplay()))
@@ -198,10 +199,10 @@ class ComputerPlayer(Player):
 			total = game.board.getRowTotal(row)
 			if total == myTotal:
 				validMoves.extend(self.determineValidMovesInRow(row))
-				strongCandidates.insert(0, validMoves)
+				strongCandidates[0:] = validMoves
 			elif total == opponentTotal:
 				validMoves.extend(self.determineValidMovesInRow(row))
-				strongCandidates.append(validMoves)
+				strongCandidates.extend(validMoves)
 			else:
 				validMoves.extend(self.determineValidMovesInRow(row))
 				candidateMoves.extend(validMoves)
@@ -209,7 +210,8 @@ class ComputerPlayer(Player):
 		if len(strongCandidates) > 0:
 			return strongCandidates[0]
 		else:
-			return candidateMoves[0]
+			seed()
+			return candidateMoves[random.randint(0,len(candidateMoves) - 1)]
 						
 	def determineValidMovesInRow(self, row):
 		moves = []

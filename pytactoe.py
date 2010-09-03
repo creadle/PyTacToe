@@ -1,5 +1,6 @@
 #This is my version of TicTacToe
 #I'm implementing this as a Breakable Toy, so it will likely be way overengineered, but that's the point
+import random
 
 class Game:
 
@@ -184,6 +185,7 @@ class ComputerPlayer(Player):
 		#initially the algo here will be rather simple, basically looking at the rows with the closest for a win for either player
 		#making a move in that same row.  Later on, I'll setup some kind of tree like Micah Martin suggested
 		#for Jake Scruggs to do.
+		random.seed()
 		
 		if self.playerSymbol == game.player1.getSymbol():
 			myTotal = 2
@@ -198,10 +200,10 @@ class ComputerPlayer(Player):
 			total = game.board.getRowTotal(row)
 			if total == myTotal:
 				validMoves.extend(self.determineValidMovesInRow(row))
-				strongCandidates.insert(0, validMoves)
+				strongCandidates[0:] = validMoves
 			elif total == opponentTotal:
 				validMoves.extend(self.determineValidMovesInRow(row))
-				strongCandidates.append(validMoves)
+				strongCandidates.extend(validMoves)
 			else:
 				validMoves.extend(self.determineValidMovesInRow(row))
 				candidateMoves.extend(validMoves)
@@ -209,7 +211,7 @@ class ComputerPlayer(Player):
 		if len(strongCandidates) > 0:
 			return strongCandidates[0]
 		else:
-			return candidateMoves[0]
+			return candidateMoves[random.randint(0,len(candidateMoves) - 1)]
 						
 	def determineValidMovesInRow(self, row):
 		moves = []
