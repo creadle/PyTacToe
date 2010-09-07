@@ -28,11 +28,11 @@ class Game:
 		else:
 			currentPlayer = self.player2
 		while 1:
-			self.board.displayBoard()
-			if self.board.hasValidMove():
+			self.board.displayBoard(self.board)
+			if self.board.hasValidMove(self.board):
 				move = currentPlayer.requestMove()
-				self.board.makeMove(move, currentPlayer.getSymbol())
-				if self.board.checkForWinner():
+				self.board = self.board.makeMove(self.board, move, currentPlayer.getSymbol())
+				if self.board.checkForWinner(self.board):
 					break
 				else:
 					if currentPlayer == self.player1:
@@ -75,6 +75,9 @@ class Game:
 			else:
 				self.player2 = ComputerPlayer('X')
 				self.player1 = ComputerPlayer('O')
+	
+	def getBoard(self):
+		return self.board
 		
 
 class Board:
@@ -86,24 +89,26 @@ class Board:
 		for i in range(9):
 			self.board.append(Square(0, i))
 
-	def hasValidMove(self):
-		for i in range(len(self.board)):
-			if self.board[i].getState() == 0:
+	def hasValidMove(self, board):
+		for i in range(len(board.board)):
+			if board.board[i].getState() == 0:
 				return True
 		return False
 
-	def makeMove(self, move, symbol):
-		self.board[move].setState(symbol)
+	def makeMove(self, board, move, symbol):
+		board.board[move].setState(symbol)
+		return board
+		
 
-	def displayBoard(self):
-		print("{0}|{1}|{2}".format(self.board[0].getDisplay(), self.board[1].getDisplay(), self.board[2].getDisplay()))
+	def displayBoard(self, board):
+		print("{0}|{1}|{2}".format(board.board[0].getDisplay(), board.board[1].getDisplay(), board.board[2].getDisplay()))
 		print("-----")
-		print("{0}|{1}|{2}".format(self.board[3].getDisplay(), self.board[4].getDisplay(), self.board[5].getDisplay()))
+		print("{0}|{1}|{2}".format(board.board[3].getDisplay(), board.board[4].getDisplay(), board.board[5].getDisplay()))
 		print("-----")
-		print("{0}|{1}|{2}".format(self.board[6].getDisplay(), self.board[7].getDisplay(), self.board[8].getDisplay()))
+		print("{0}|{1}|{2}".format(board.board[6].getDisplay(), board.board[7].getDisplay(), board.board[8].getDisplay()))
 
-	def checkForWinner(self):
-		for row in self.rows:
+	def checkForWinner(self, board):
+		for row in board.rows:
 			rowTotal = self.getRowTotal(row)
 			if rowTotal == 3:
 				return 1
@@ -126,8 +131,8 @@ class Board:
 	def getRows(self):
 		return self.rows
 	
-	def isValidMove(self, move):
-		return (move >= 0 and move <= 8 and self.board[move].getState() == 0)
+	def isValidMove(self, board, move):
+		return (move >= 0 and move <= 8 and board.board[move].getState() == 0)
 
 class Square:
 	"""Holds the state for each square, as well as the display character."""
@@ -185,6 +190,7 @@ class ComputerPlayer(Player):
 		#initially the algo here will be rather simple, basically looking at the rows with the closest for a win for either player
 		#making a move in that same row.  Later on, I'll setup some kind of tree like Micah Martin suggested
 		#for Jake Scruggs to do.
+		#it was actually the minimax algo that was suggested, (though that traces the moves like a tree)
 		random.seed()
 		
 		if self.playerSymbol == game.player1.getSymbol():
@@ -220,7 +226,7 @@ class ComputerPlayer(Player):
 	def determineValidMovesInRow(self, row):
 		moves = []
 		for square in row:
-			if game.board.isValidMove(square):
+			if game.board.isValidMove(game.board, square):
 				moves.append(square)
 		return moves
 						
@@ -232,7 +238,7 @@ game = Game()
 print("Welcome to PyTacToe!")
 game.gameSetup()
 game.gameLoop()
-result = game.board.checkForWinner()
-game.board.displayBoard()
+result = game.board.checkForWinner(game.board)
+game.board.displayBoard(game.board)
 game.announceResult(result)
 
