@@ -1,6 +1,6 @@
 #This is my version of TicTacToe
 #I'm implementing this as a Breakable Toy, so it will likely be way overengineered, but that's the point
-import random
+import copy
 
 class Game:
 
@@ -30,7 +30,10 @@ class Game:
 		while 1:
 			self.board.displayBoard(self.board)
 			if self.board.hasValidMove(self.board):
-				move = currentPlayer.requestMove()
+				print("Before we call requestMove(), openSpaces is equal to: ", self.board.getOpenSpaces())
+				boardCopy = copy.deepcopy(self.board)
+				move = currentPlayer.requestMove(boardCopy)
+				print("After we call requestMove(), openSpaces is equal to: ", self.board.getOpenSpaces())
 				self.board = self.board.makeMove(self.board, move, currentPlayer.getSymbol())
 				if self.board.checkForWinner(self.board):
 					break
@@ -88,6 +91,7 @@ class Board:
 		self.rows = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]]
 		for i in range(9):
 			self.board.append(Square(0, i))
+		self.openSpaces = list(range(9))
 
 	def hasValidMove(self, board):
 		for i in range(len(board.board)):
@@ -97,10 +101,12 @@ class Board:
 
 	def makeMove(self, board, move, symbol):
 		board.board[move].setState(symbol)
+		board.openSpaces.remove(move)
 		return board
 		
 
 	def displayBoard(self, board):
+		print()
 		print("{0}|{1}|{2}".format(board.board[0].getDisplay(), board.board[1].getDisplay(), board.board[2].getDisplay()))
 		print("-----")
 		print("{0}|{1}|{2}".format(board.board[3].getDisplay(), board.board[4].getDisplay(), board.board[5].getDisplay()))
@@ -132,8 +138,11 @@ class Board:
 		return self.rows
 	
 	def isValidMove(self, board, move):
-		return (move >= 0 and move <= 8 and board.board[move].getState() == 0)
-
+		return (move >= 0 and move <= 8 and board.openSpaces.count(move) != 0)
+	
+	def getOpenSpaces(self):
+		return self.openSpaces
+		
 class Square:
 	"""Holds the state for each square, as well as the display character."""
 
@@ -157,8 +166,12 @@ class Player:
 
 	def __init__(self, symbol):
 		self.playerSymbol = symbol
+		if symbol == 'X':
+			self.opponentSymbol = 'O'
+		else:
+			self.opponentSymbol = 'X'
 
-	def requestMove(self):
+	def requestMove(self, board):
 		"""we're just going to be overriding this.  there should never be a generic Player object that will receive a call to this..."""
 		pass
 	
@@ -171,11 +184,11 @@ class HumanPlayer(Player):
 	# def __init__(self, symbol):
 		# self.playerSymbol = symbol
 		
-	def requestMove(self):
+	def requestMove(self, board):
 		move = int(input("Please input the number of the square for your move: "))
-		while not game.board.isValidMove(move):
+		while not board.isValidMove(board, move):
 			print("That is not a valid move.")
-			game.board.displayBoard()
+			board.displayBoard(board)
 			move = int(input("Please input the number of the square for your move: "))
 	
 		return move
@@ -186,42 +199,14 @@ class ComputerPlayer(Player):
 	# def __init__(self, symbol):
 		# self.playerSymbol = symbol
 		
-	def requestMove(self):
+	def requestMove(self, board):
 		#initially the algo here will be rather simple, basically looking at the rows with the closest for a win for either player
 		#making a move in that same row.  Later on, I'll setup some kind of tree like Micah Martin suggested
 		#for Jake Scruggs to do.
 		#it was actually the minimax algo that was suggested, (though that traces the moves like a tree)
-		random.seed()
-		
-		if self.playerSymbol == game.player1.getSymbol():
-			myTotal = 2
-			opponentTotal = 20
-		else:
-			myTotal = 20
-			opponentTotal = 2
-		candidateMoves = []
-		strongCandidates = []
-		for row in game.board.getRows():
-			validMoves = []
-			total = game.board.getRowTotal(row)
-			
-			#if it's a winning move we want it at the top of the list, and blocking moves at the bottom
-			#either way, we return the first move in the list
-			if total == myTotal:
-				validMoves.extend(self.determineValidMovesInRow(row))
-				strongCandidates[0:] = validMoves
-			elif total == opponentTotal:
-				validMoves.extend(self.determineValidMovesInRow(row))
-				strongCandidates.extend(validMoves)
-			else:
-				validMoves.extend(self.determineValidMovesInRow(row))
-				candidateMoves.extend(validMoves)
-		
-		if len(strongCandidates) > 0:
-			return strongCandidates[0]
-		else:
-			#since we don't have a winning or blocking move, pick a random choice from among the valid moves
-			return candidateMoves[random.randint(0,len(candidateMoves) - 1)]
+		move = self.minMax(board)
+		print(move)
+		return move
 						
 	def determineValidMovesInRow(self, row):
 		moves = []
@@ -229,8 +214,38 @@ class ComputerPlayer(Player):
 			if game.board.isValidMove(game.board, square):
 				moves.append(square)
 		return moves
-						
 		
+	def minMax(self, board):
+		validMoves = board.getOpenSpaces()
+		
+		if not board.hasValidMove(board):
+			return board.checkForWinner(board)
+		
+		max = -10000
+		for move in validMoves:
+			boardCopy = copy.deepcopy(board)
+			boardCopy.makeMove(boardCopy, move, self.playerSymbol)
+			result = self.opponentMax(boardCopy)
+			if result > max:
+				max = result
+		
+		return max
+	
+	def opponentMax(self, board):
+		validMoves = board.getOpenSpaces()
+		
+		if not board.hasValidMove(board):
+			return board.checkForWinner(board)
+		
+		min = 10000
+		for move in validMoves:
+			boardCopy = copy.deepcopy(board)
+			boardCopy.makeMove(boardCopy, move, self.opponentSymbol)
+			result = self.minMax(boardCopy)
+			if result < min:
+				min = result
+		
+		return min
 
 #start the show
 game = Game()
@@ -239,6 +254,6 @@ print("Welcome to PyTacToe!")
 game.gameSetup()
 game.gameLoop()
 result = game.board.checkForWinner(game.board)
-game.board.displayBoard()
+game.board.displayBoard(game.board)
 game.announceResult(result)
 
