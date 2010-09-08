@@ -8,15 +8,15 @@ class Game:
 
 	def __init__(self):
 		self.board = Board()
-		self.player1 = None
-		self.player2 = None
+		self.player1 = Player()
+		self.player2 = Player()
 			
 	def announceResult(self, result):
 		if result == 0:
-			print("Shockingly, it\'s a draw!!!")
+			print("Shockingly, it's a draw!!!")
 		elif result == 1:
 			print("Player 1 is the winner!")
-		elif result == 2:
+		elif result == -1:
 			print("Player 2 is the winner!")
 		else:
 			print("Invalid result!!!")
@@ -30,12 +30,10 @@ class Game:
 		while 1:
 			self.board.displayBoard(self.board)
 			if self.board.hasValidMove(self.board):
-				print("Before we call requestMove(), openSpaces is equal to: ", self.board.getOpenSpaces())
 				boardCopy = copy.deepcopy(self.board)
 				move = currentPlayer.requestMove(boardCopy)
-				print("After we call requestMove(), openSpaces is equal to: ", self.board.getOpenSpaces())
 				self.board = self.board.makeMove(self.board, move, currentPlayer.getSymbol())
-				if self.board.checkForWinner(self.board):
+				if self.board.checkForWinner(self.board, self.player1):
 					break
 				else:
 					if currentPlayer == self.player1:
@@ -59,25 +57,25 @@ class Game:
 		
 		if numberOfPlayers == 2:
 			if whichPlayerIsX == 1:
-				self.player1 = HumanPlayer('X')
-				self.player2 = HumanPlayer('O')
+				self.player1 = HumanPlayer('X', "Player 1", self.player2)
+				self.player2 = HumanPlayer('O', "Player 2", self.player1)
 			else:
-				self.player2 = HumanPlayer('X')
-				self.player1 = HumanPlayer('O')
+				self.player2 = HumanPlayer('X', "Player 2", self.player1)
+				self.player1 = HumanPlayer('O', "Player 1", self.player2)
 		elif numberOfPlayers == 1:
 			if whichPlayerIsX == 1:
-				self.player1 = HumanPlayer('X')
-				self.player2 = ComputerPlayer('O')
+				self.player1 = HumanPlayer('X', "Player 1", self.player2)
+				self.player2 = ComputerPlayer('O', "Player 2", self.player1)
 			else:
-				self.player2 = ComputerPlayer('X')
-				self.player1 = HumanPlayer('O')
+				self.player2 = ComputerPlayer('X', "Player 2", self.player1)
+				self.player1 = HumanPlayer('O', "Player 1", self.player2)
 		else:
 			if whichPlayerIsX == 1:
-				self.player1 = ComputerPlayer('X')
-				self.player2 = ComputerPlayer('O')
+				self.player1 = ComputerPlayer('X', "Player 1", self.player2)
+				self.player2 = ComputerPlayer('O', "Player 2", self.player1)
 			else:
-				self.player2 = ComputerPlayer('X')
-				self.player1 = ComputerPlayer('O')
+				self.player2 = ComputerPlayer('X', "Player 2", self.player1)
+				self.player1 = ComputerPlayer('O', "Player 1", self.player2)
 	
 	def getBoard(self):
 		return self.board
@@ -113,23 +111,25 @@ class Board:
 		print("-----")
 		print("{0}|{1}|{2}".format(board.board[6].getDisplay(), board.board[7].getDisplay(), board.board[8].getDisplay()))
 
-	def checkForWinner(self, board):
+	def checkForWinner(self, board, player):
 		for row in board.rows:
-			rowTotal = self.getRowTotal(row)
+			rowTotal = self.getRowTotal(row, player.playerSymbol)
 			if rowTotal == 3:
 				return 1
 			elif rowTotal == 30:
-				return 2
+				return -1
 			else:
 				continue
 		return 0
 		
-	def getRowTotal(self, row):
+	def getRowTotal(self, row, symbol):
 		rowTotal = 0
 		for cell in row:
-			if self.board[cell].getState() == game.player1.getSymbol():
+			if self.board[cell].getState() == symbol:
 				rowTotal += 1
-			elif self.board[cell].getState() == game.player2.getSymbol():
+			elif self.board[cell].getState() == '0':
+				rowTotal += 0
+			else:
 				rowTotal += 10
 		
 		return rowTotal
@@ -164,12 +164,10 @@ class Square:
 class Player:
 	"""Holds the symbol that each player is using as well the requestMove() method to request (or calculate in the case of a computer opponent) the move"""
 
-	def __init__(self, symbol):
+	def __init__(self, symbol = None, name = None, opponent = None):
 		self.playerSymbol = symbol
-		if symbol == 'X':
-			self.opponentSymbol = 'O'
-		else:
-			self.opponentSymbol = 'X'
+		self.name = name
+		self.opponent = opponent
 
 	def requestMove(self, board):
 		"""we're just going to be overriding this.  there should never be a generic Player object that will receive a call to this..."""
@@ -207,44 +205,43 @@ class ComputerPlayer(Player):
 		move = self.minMax(board)
 		print(move)
 		return move
-						
-	def determineValidMovesInRow(self, row):
-		moves = []
-		for square in row:
-			if game.board.isValidMove(game.board, square):
-				moves.append(square)
-		return moves
-		
+	
 	def minMax(self, board):
-		validMoves = board.getOpenSpaces()
-		
+		bestResult = -10000
+		bestMove = None
+		for move in board.getOpenSpaces():
+			boardCopy = copy.deepcopy(board)
+			moveResult = self.opponentMax(boardCopy.makeMove(boardCopy, move, self.playerSymbol))
+			if moveResult > bestResult:
+				bestMove = move
+				bestResult = moveResult
+		return bestMove
+	
+	def myMax(self, board):
 		if not board.hasValidMove(board):
-			return board.checkForWinner(board)
-		
+			return board.checkForWinner(board, self)
+				
 		max = -10000
+		validMoves = board.getOpenSpaces()
 		for move in validMoves:
 			boardCopy = copy.deepcopy(board)
-			boardCopy.makeMove(boardCopy, move, self.playerSymbol)
-			result = self.opponentMax(boardCopy)
-			if result > max:
-				max = result
-		
+			moveResult = self.opponentMax(boardCopy.makeMove(boardCopy, move, self.playerSymbol))
+			if moveResult > max:
+				max = moveResult
 		return max
 	
 	def opponentMax(self, board):
 		validMoves = board.getOpenSpaces()
 		
 		if not board.hasValidMove(board):
-			return board.checkForWinner(board)
+			return board.checkForWinner(board, self.opponent)
 		
 		min = 10000
 		for move in validMoves:
 			boardCopy = copy.deepcopy(board)
-			boardCopy.makeMove(boardCopy, move, self.opponentSymbol)
-			result = self.minMax(boardCopy)
-			if result < min:
-				min = result
-		
+			moveResult = self.myMax(boardCopy.makeMove(boardCopy, move, self.opponent.playerSymbol))
+			if moveResult < min:
+				min = moveResult
 		return min
 
 #start the show
@@ -253,7 +250,7 @@ game = Game()
 print("Welcome to PyTacToe!")
 game.gameSetup()
 game.gameLoop()
-result = game.board.checkForWinner(game.board)
+result = game.board.checkForWinner(game.board, game.player1)
 game.board.displayBoard(game.board)
 game.announceResult(result)
 
