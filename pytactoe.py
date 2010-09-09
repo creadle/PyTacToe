@@ -127,7 +127,7 @@ class Board:
 		for cell in row:
 			if self.board[cell].getState() == symbol:
 				rowTotal += 1
-			elif self.board[cell].getState() == '0':
+			elif self.board[cell].getState() == 0:
 				rowTotal += 0
 			else:
 				rowTotal += 10
@@ -245,12 +245,13 @@ class ComputerPlayer(Player):
 		return min
 
 #start the show
-game = Game()
-
-print("Welcome to PyTacToe!")
-game.gameSetup()
-game.gameLoop()
-result = game.board.checkForWinner(game.board, game.player1)
-game.board.displayBoard(game.board)
-game.announceResult(result)
+if __name__ == "__main__":
+	game = Game()
+	
+	print("Welcome to PyTacToe!")
+	game.gameSetup()
+	game.gameLoop()
+	result = game.board.checkForWinner(game.board, game.player1)
+	game.board.displayBoard(game.board)
+	game.announceResult(result)
 
