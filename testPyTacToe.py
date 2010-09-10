@@ -27,12 +27,42 @@ class BoardTestCase(unittest.TestCase):
 	def testWinForO(self):
 		result = self.winningBoardForO.checkForWinner(self.winningBoardForO, self.playerX)
 		assert result == -1
-	
+		
+class ComputerPlayerBlockingMoveTestCase(unittest.TestCase):
+	def setUp(self):
+		self.computerPlayer = pytactoe.Player()
+		self.humanPlayer = pytactoe.Player('X', "Player X", self.computerPlayer)
+		self.computerPlayer = pytactoe.Player('O', "Player O", self.humanPlayer)
+		self.board = pytactoe.Board()
+		self.board.makeMove(self.board, 0, self.computerPlayer.getSymbol())
+		self.board.makeMove(self.board, 4, self.humanPlayer.getSymbol())
+		self.board.makeMove(self.board, 1, self.computerPlayer.getSymbol())
+		self.board.makeMove(self.board, 2, self.humanPlayer.getSymbol())
+		
+	def testComputerPlayerBlockingMove(self):
+		assert self.computerPlayer.requestMove(self.board) == 6
+		
+class ComputerPlayerWinningMoveTestCase(unittest.TestCase):
+	def setUp(self):
+		self.computerPlayer = pytactoe.Player()
+		self.humanPlayer = pytactoe.Player('X', "Player X", self.computerPlayer)
+		self.computerPlayer = pytactoe.Player('O', "Player O", self.humanPlayer)
+		self.board = pytactoe.Board()
+		self.board.makeMove(self.board, 0, self.computerPlayer.getSymbol())
+		self.board.makeMove(self.board, 4, self.humanPlayer.getSymbol())
+		self.board.makeMove(self.board, 1, self.computerPlayer.getSymbol())
+		self.board.makeMove(self.board, 3, self.humanPlayer.getSymbol())
+		
+	def testComputerPlayerWinningMove(self):
+		assert self.computerPlayer.requestMove(self.board) == 2
+			
 def suite():
 	suite = unittest.TestSuite()
 	suite.addTest(BoardTestCase("testDraw"))
 	suite.addTest(BoardTestCase("testWinForX"))
 	suite.addTest(BoardTestCase("testWinForO"))
+	suite.addTest(ComputerPlayerBlockingMoveTestCase("testComputerPlayerBlockingMove"))
+	suite.addTest(ComputerPlayerWinningMoveTestCase("testComputerPlayerWinningMove"))
 	return suite
 
 runner = unittest.TextTestRunner()
