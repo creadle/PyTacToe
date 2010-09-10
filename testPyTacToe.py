@@ -62,8 +62,9 @@ def suite():
 	suite.addTest(BoardTestCase("testWinForX"))
 	suite.addTest(BoardTestCase("testWinForO"))
 	suite.addTest(ComputerPlayerBlockingMoveTestCase("testComputerPlayerBlockingMove"))
-	suite.addTest(ComputerPlayerWinningMoveTestCase("testComputerPlayerWinningMove"))
+	suite.addTest(ComputerPlayerWinningMoveTestCase("testComputerPlayerWinningMove	"))
 	return suite
 
-runner = unittest.TextTestRunner()
-runner.run(suite())
+if __name__ == '__main__':
+	runner = unittest.TextTestRunner()
+	runner.run(suite())
