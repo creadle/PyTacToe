@@ -179,9 +179,6 @@ class Player:
 class HumanPlayer(Player):
 	"""subclass for Human Players.  We'll be moving the requestMove() methoed into the parent and overriding in here and in ComputerPlayer"""
 	
-	# def __init__(self, symbol):
-		# self.playerSymbol = symbol
-		
 	def requestMove(self, board):
 		move = int(input("Please input the number of the square for your move: "))
 		while not board.isValidMove(board, move):
@@ -194,9 +191,6 @@ class HumanPlayer(Player):
 class ComputerPlayer(Player):
 	"""sub for computer players"""
 	
-	# def __init__(self, symbol):
-		# self.playerSymbol = symbol
-		
 	def requestMove(self, board):
 		#initially the algo here will be rather simple, basically looking at the rows with the closest for a win for either player
 		#making a move in that same row.  Later on, I'll setup some kind of tree like Micah Martin suggested
@@ -207,11 +201,19 @@ class ComputerPlayer(Player):
 		return move
 	
 	def minMax(self, board):
+		#pdb.set_trace()
 		bestResult = -10000
 		bestMove = None
 		for move in board.getOpenSpaces():
-			boardCopy = copy.deepcopy(board)
-			moveResult = self.opponentMax(boardCopy.makeMove(boardCopy, move, self.playerSymbol))
+			boardCopy = copy.deepcopy(board.makeMove(board, move, self.playerSymbol))
+			if boardCopy.checkForWinner(boardCopy, self) == 1:
+				return move
+			elif boardCopy.checkForWinner(boardCopy, self) == -1:
+				return move
+			else:
+				continue
+			
+			moveResult = self.opponentMax(boardCopy)
 			if moveResult > bestResult:
 				bestMove = move
 				bestResult = moveResult
@@ -224,22 +226,23 @@ class ComputerPlayer(Player):
 		max = -10000
 		validMoves = board.getOpenSpaces()
 		for move in validMoves:
-			boardCopy = copy.deepcopy(board)
-			moveResult = self.opponentMax(boardCopy.makeMove(boardCopy, move, self.playerSymbol))
+			boardCopy = copy.deepcopy(board.makeMove(board, move, self.playerSymbol))
+			if boardCopy.checkForWinner(boardCopy, self):
+				return move
+			moveResult = self.opponentMax(boardCopy)
 			if moveResult > max:
 				max = moveResult
 		return max
 	
 	def opponentMax(self, board):
-		validMoves = board.getOpenSpaces()
-		
 		if not board.hasValidMove(board):
 			return board.checkForWinner(board, self.opponent)
 		
+		validMoves = board.getOpenSpaces()
 		min = 10000
 		for move in validMoves:
-			boardCopy = copy.deepcopy(board)
-			moveResult = self.myMax(boardCopy.makeMove(boardCopy, move, self.opponent.playerSymbol))
+			boardCopy = copy.deepcopy(board.makeMove(board, move, self.opponent.playerSymbol))
+			moveResult = self.myMax(boardCopy)
 			if moveResult < min:
 				min = moveResult
 		return min
