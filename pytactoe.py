@@ -57,25 +57,32 @@ class Game:
 		
 		if numberOfPlayers == 2:
 			if whichPlayerIsX == 1:
-				self.player1 = HumanPlayer('X', "Player 1", self.player2)
+				self.player1 = HumanPlayer('X', "Player 1")
 				self.player2 = HumanPlayer('O', "Player 2", self.player1)
+				self.player1.opponent = self.player2
 			else:
-				self.player2 = HumanPlayer('X', "Player 2", self.player1)
+				self.player2 = HumanPlayer('X', "Player 2")
 				self.player1 = HumanPlayer('O', "Player 1", self.player2)
+				self.player2.opponent = self.player1
+				
 		elif numberOfPlayers == 1:
 			if whichPlayerIsX == 1:
-				self.player1 = HumanPlayer('X', "Player 1", self.player2)
+				self.player1 = HumanPlayer('X', "Player 1")
 				self.player2 = ComputerPlayer('O', "Player 2", self.player1)
+				self.player1.opponent = self.player2
 			else:
-				self.player2 = ComputerPlayer('X', "Player 2", self.player1)
+				self.player2 = ComputerPlayer('X', "Player 2")
 				self.player1 = HumanPlayer('O', "Player 1", self.player2)
+				self.player2.opponent = self.player1
 		else:
 			if whichPlayerIsX == 1:
-				self.player1 = ComputerPlayer('X', "Player 1", self.player2)
+				self.player1 = ComputerPlayer('X', "Player 1")
 				self.player2 = ComputerPlayer('O', "Player 2", self.player1)
+				self.player1.opponent = self.player2
 			else:
-				self.player2 = ComputerPlayer('X', "Player 2", self.player1)
+				self.player2 = ComputerPlayer('X', "Player 2")
 				self.player1 = ComputerPlayer('O', "Player 1", self.player2)
+				self.player2.opponent = self.player1
 	
 	def getBoard(self):
 		return self.board
@@ -201,58 +208,46 @@ class ComputerPlayer(Player):
 		return move
 	
 	def minMax(self, board):
-		#pdb.set_trace()
-		bestResult = -10000
-		bestMove = None
-		for move in board.getOpenSpaces():
-			boardCopy = copy.deepcopy(board.makeMove(board, move, self.playerSymbol))
-			if boardCopy.checkForWinner(boardCopy, self) == 1:
-				return move
-			elif boardCopy.checkForWinner(boardCopy, self) == -1:
-				return move
-			else:
-				continue
+		self.bestMove = None
+		self.myMax(board, self)
+		return self.bestMove
+	
+	def myMax(self, board, player):
+		winner = board.checkForWinner(board, self)
+		if winner == 1:
+			return 10000
+		elif winner != 0:
+			return -10000
+		elif not board.hasValidMove(board):
+			return 0
+					
+		if player == self:
+			alpha = -10000
+		else:
+			alpha = 10000
 			
-			moveResult = self.opponentMax(boardCopy)
-			if moveResult > bestResult:
-				bestMove = move
-				bestResult = moveResult
-		return bestMove
-	
-	def myMax(self, board):
-		if not board.hasValidMove(board):
-			return board.checkForWinner(board, self)
+		for move in board.getOpenSpaces():
+			boardCopy = copy.deepcopy(board)
+			boardCopy.makeMove(boardCopy, move, player.playerSymbol)
+			
+			subAlpha = self.myMax(boardCopy, player.opponent)
+			if player == self:
+				if alpha <= subAlpha:
+					self.bestMove = move
 				
-		max = -10000
-		validMoves = board.getOpenSpaces()
-		for move in validMoves:
-			boardCopy = copy.deepcopy(board.makeMove(board, move, self.playerSymbol))
-			if boardCopy.checkForWinner(boardCopy, self):
-				return move
-			moveResult = self.opponentMax(boardCopy)
-			if moveResult > max:
-				max = moveResult
-		return max
-	
-	def opponentMax(self, board):
-		if not board.hasValidMove(board):
-			return board.checkForWinner(board, self.opponent)
+				alpha = max(alpha, subAlpha)
+			else:
+				alpha = min(alpha, subAlpha)
 		
-		validMoves = board.getOpenSpaces()
-		min = 10000
-		for move in validMoves:
-			boardCopy = copy.deepcopy(board.makeMove(board, move, self.opponent.playerSymbol))
-			moveResult = self.myMax(boardCopy)
-			if moveResult < min:
-				min = moveResult
-		return min
-
+		return alpha
+	
 #start the show
 if __name__ == "__main__":
 	game = Game()
 	
 	print("Welcome to PyTacToe!")
 	game.gameSetup()
+	print(game.player1.playerSymbol, game.player1.opponent.playerSymbol)
 	game.gameLoop()
 	result = game.board.checkForWinner(game.board, game.player1)
 	game.board.displayBoard(game.board)
