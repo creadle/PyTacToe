@@ -1,6 +1,6 @@
 #This is my version of TicTacToe
 #I'm implementing this as a Breakable Toy, so it will likely be way overengineered, but that's the point
-import copy, random
+import copy
 
 class Game:
 
