@@ -1,6 +1,6 @@
 #This is my version of TicTacToe
 #I'm implementing this as a Breakable Toy, so it will likely be way overengineered, but that's the point
-import copy
+import copy, random
 
 class Game:
 
@@ -168,7 +168,7 @@ class Square:
 
 		
 class Player:
-	"""Holds the symbol that each player is using as well the requestMove() method to request (or calculate in the case of a computer opponent) the move"""
+	"""Player super class"""
 
 	def __init__(self, symbol = None, name = None, opponent = None):
 		self.playerSymbol = symbol
@@ -176,14 +176,14 @@ class Player:
 		self.opponent = opponent
 
 	def requestMove(self, board):
-		"""we're just going to be overriding this.  there should never be a generic Player object that will receive a call to this..."""
+		"""overridden"""
 		pass
 	
 	def getSymbol(self):
 		return self.playerSymbol
 
 class HumanPlayer(Player):
-	"""subclass for Human Players.  We'll be moving the requestMove() methoed into the parent and overriding in here and in ComputerPlayer"""
+	"""subclass for Human Players."""
 	
 	def requestMove(self, board):
 		move = int(input("Please input the number of the square for your move: "))
@@ -207,10 +207,10 @@ class ComputerPlayer(Player):
 		return move
 	
 	def minMax(self, board):
-		self.bestMove = None
+		self.bestMoves = []
 		workingBoard = copy.deepcopy(board)
 		self.myMax(workingBoard, self)
-		return self.bestMove
+		return self.bestMoves[0]
 	
 	def myMax(self, board, player):
 		winner = board.checkForWinner(board, self)
@@ -222,24 +222,24 @@ class ComputerPlayer(Player):
 			return 0
 					
 		if player == self:
-			alpha = -10000
+			moveResult = -10000
 		else:
-			alpha = 10000
+			moveResult = 10000
 			
 		for move in board.getOpenSpaces():
 			boardCopy = copy.deepcopy(board)
 			boardCopy.makeMove(boardCopy, move, player.playerSymbol)
 			
-			subAlpha = self.myMax(boardCopy, player.opponent)
+			subMoveResult = self.myMax(boardCopy, player.opponent)
 			if player == self:
-				if alpha <= subAlpha:
-					self.bestMove = move
+				if moveResult <= subMoveResult:
+					self.bestMoves.insert(0, move)
 				
-				alpha = max(alpha, subAlpha)
+				moveResult = max(moveResult, subMoveResult)
 			else:
-				alpha = min(alpha, subAlpha)
+				moveResult = min(moveResult, subMoveResult)
 		
-		return alpha
+		return moveResult
 	
 #start the show
 if __name__ == "__main__":
@@ -247,7 +247,6 @@ if __name__ == "__main__":
 	
 	print("Welcome to PyTacToe!")
 	game.gameSetup()
-	print(game.player1.playerSymbol, game.player1.opponent.playerSymbol)
 	game.gameLoop()
 	result = game.board.checkForWinner(game.board, game.player1)
 	game.board.displayBoard(game.board)
