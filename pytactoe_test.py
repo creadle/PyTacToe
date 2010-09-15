@@ -35,12 +35,15 @@ class ComputerPlayerBlockingMove_Test(unittest.TestCase):
 		self.computerPlayer = pytactoe.Player('O', "Player O", self.humanPlayer)
 		self.board = pytactoe.Board()
 		self.board.makeMove(self.board, 0, self.computerPlayer.getSymbol())
-		self.board.makeMove(self.board, 4, self.humanPlayer.getSymbol())
-		self.board.makeMove(self.board, 1, self.computerPlayer.getSymbol())
-		self.board.makeMove(self.board, 2, self.humanPlayer.getSymbol())
+		self.board.makeMove(self.board, 4, self.computerPlayer.getSymbol())
+		self.board.makeMove(self.board, 8, self.humanPlayer.getSymbol())
+		self.board.makeMove(self.board, 5, self.humanPlayer.getSymbol())
 		
 	def computerPlayerBlockingMove_Test(self):
-		assert self.computerPlayer.requestMove(self.board) == 6
+		#squareValues = [square.getDisplay() for square in self.board.board]
+		#print(squareValues)
+		#print(self.computerPlayer.requestMove(self.board))
+		assert self.computerPlayer.requestMove(self.board) == 2
 		
 class ComputerPlayerWinningMove_Test(unittest.TestCase):
 	def setUp(self):
@@ -48,13 +51,16 @@ class ComputerPlayerWinningMove_Test(unittest.TestCase):
 		self.humanPlayer = pytactoe.Player('X', "Player X", self.computerPlayer)
 		self.computerPlayer = pytactoe.Player('O', "Player O", self.humanPlayer)
 		self.board = pytactoe.Board()
-		self.board.makeMove(self.board, 0, self.computerPlayer.getSymbol())
+		self.board.makeMove(self.board, 0, self.humanPlayer.getSymbol())
 		self.board.makeMove(self.board, 4, self.humanPlayer.getSymbol())
-		self.board.makeMove(self.board, 1, self.computerPlayer.getSymbol())
-		self.board.makeMove(self.board, 3, self.humanPlayer.getSymbol())
+		self.board.makeMove(self.board, 8, self.computerPlayer.getSymbol())
+		self.board.makeMove(self.board, 5, self.computerPlayer.getSymbol())
 		
 	def computerPlayerWinningMove_Test(self):
-		assert self.computerPlayer.requestMove(self.board) == 2
+		#squareValues = [square.getDisplay() for square in self.board.board]
+		#print(squareValues)
+		#print(self.computerPlayer.requestMove(self.board))
+		assert self.computerPlayer.requestMove(self.board) == 2	
 			
 def suite():
 	suite = unittest.TestSuite()

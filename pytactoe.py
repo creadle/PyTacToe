@@ -30,8 +30,7 @@ class Game:
 		while 1:
 			self.board.displayBoard(self.board)
 			if self.board.hasValidMove(self.board):
-				boardCopy = copy.deepcopy(self.board)
-				move = currentPlayer.requestMove(boardCopy)
+				move = currentPlayer.requestMove(self.board)
 				self.board = self.board.makeMove(self.board, move, currentPlayer.getSymbol())
 				if self.board.checkForWinner(self.board, self.player1) != 0:
 					break
@@ -209,14 +208,15 @@ class ComputerPlayer(Player):
 	
 	def minMax(self, board):
 		self.bestMove = None
-		self.myMax(board, self)
+		workingBoard = copy.deepcopy(board)
+		self.myMax(workingBoard, self)
 		return self.bestMove
 	
 	def myMax(self, board, player):
 		winner = board.checkForWinner(board, self)
 		if winner == 1:
 			return 10000
-		elif winner != 0:
+		elif winner == -1:
 			return -10000
 		elif not board.hasValidMove(board):
 			return 0
